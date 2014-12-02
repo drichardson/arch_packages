@@ -1,0 +1,23 @@
+# Maintainer: Doug Richardson <dougie.richardson@gmail.com>
+pkgname=vmware_clock_sync
+pkgver=0.0.1
+pkgrel=1
+pkgdesc="Fix system clock drift that occurs when VMWare host sleeps."
+arch=(any)
+url="https://github.com/drichardson/arch_packages"
+license=('BSD')
+depends=(util-linux)
+optdepends=()
+backup=()
+changelog=
+install=vmware_clock_sync.install
+source=('vmware_clock_sync.timer'
+        'vmware_clock_sync.service')
+md5sums=('78679123eb857bb69c56141eb62f422c'
+         '42d86a087aacb0d90f8267efdd06d2af')
+
+package() {
+  install -Dm755 "$srcdir"/vmware_clock_sync.timer "$pkgdir"/usr/lib/systemd/system/vmware_clock_sync.timer
+  install -Dm755 "$srcdir"/vmware_clock_sync.service "$pkgdir"/usr/lib/systemd/system/vmware_clock_sync.service
+}
+
