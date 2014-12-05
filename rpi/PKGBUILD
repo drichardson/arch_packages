@@ -13,7 +13,7 @@ changelog=
 install=
 source=(rpi rpi.1)
 md5sums=('8c77244f7fda103ffd89178cf4dffc2b'
-         '6af5f2df9c4df7be86766b0ede18fd36')
+         '1c7178ce5cefd2d4acdbfb6f82761f70')
 
 build() {
     cd "$srcdir"
