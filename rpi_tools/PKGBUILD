@@ -11,10 +11,17 @@ optdepends=()
 backup=()
 changelog=
 install=
-source=('rpi')
-md5sums=('0e0d16fea54247adac136206c49a7661')
+source=('rpi' 'rpi.1')
+md5sums=('0e0d16fea54247adac136206c49a7661'
+         'e7c8061a838264776c8562144879fb2b')
+
+build() {
+    cd "$srcdir"
+    cat rpi.1 | gzip -c - > rpi.1.gz
+}
 
 package() {
   install -Dm755 "$srcdir"/rpi "$pkgdir"/usr/bin/rpi
+  install -Dm644 "$srcdir"/rpi.1.gz "$pkgdir"/usr/local/man/man1/rpi.1.gz
 }
 
