@@ -23,56 +23,65 @@ KERNEL_SRC=os.path.expanduser("~/control_linux")
 RASPBERRYPI_TOOLS=os.path.expanduser("~/raspberrypi-tools")
 CCPREFIX=os.path.expanduser("~/x-tools6h/arm-unknown-linux-gnueabihf/bin/arm-unknown-linux-gnueabihf-")
 
+def true_or_die(condition, message):
+    if not condition:
+        print("ERROR: ", message, file=sys.stderr)
+        sys.exit(1)
+
 def sudo(argv):
     a=["/usr/bin/sudo"]
     a.extend(argv)
     return subprocess.call(a)
 
 def mount(args):
-    sudo(["/usr/bin/mount", SD_CARD_BOOT_PARTITION, RPI_MOUNT_BOOT])
-    sudo(["/usr/bin/mount", SD_CARD_ROOT_PARTITION, RPI_MOUNT_ROOT])
+    print("Mounting SD card partitions")
+    rc1 = sudo(["/usr/bin/mount", SD_CARD_BOOT_PARTITION, RPI_MOUNT_BOOT])
+    rc2 = sudo(["/usr/bin/mount", SD_CARD_ROOT_PARTITION, RPI_MOUNT_ROOT])
+    true_or_die(rc1 == 0 and rc2 == 0, "A mount command failed")
+
+def umount(args):
+    print("Unmounting SD card partitions")
+    rc = sudo(["/usr/bin/umount", RPI_MOUNT_BOOT, RPI_MOUNT_ROOT])
+    true_or_die(rc == 0, "umount failed")
 
 def mkimage(args):
     mkimage_dir=os.path.join(RASPBERRYPI_TOOLS, "mkimage")
     zImage_path = os.path.join(KERNEL_SRC, "arch/arm/boot/zImage")
     argv=["./imagetool-uncompressed.py", zImage_path]
+    print("Uncompressing kernel image to ", mkimage_dir)
     cmd = subprocess.Popen(argv, cwd=mkimage_dir)
     rc = cmd.wait()
-    assert rc == 0, "imagetool-uncompressed.py failed"
+    true_or_die(rc == 0, "imagetool-uncompressed.py failed")
 
 def cpimage(args):
     kernel_img=os.path.join(RASPBERRYPI_TOOLS, "mkimage/kernel.img")
     dest=os.path.join(RPI_MOUNT_BOOT, "kernel-new.img")
     print("Copying kernel image to ", dest)
     rc = sudo(["/usr/bin/cp", kernel_img, dest])
-    assert rc == 0, "failed to copy kernel image"
+    true_or_die(rc == 0, "failed to copy kernel image")
 
-def make_kernel(args):
+def make(args):
     cross_compile="CROSS_COMPILE=" + CCPREFIX
     arch="ARCH=arm"
     argv = ["/usr/bin/make", "-j8", cross_compile, arch]
-    if args.target:
-        argv.extend([args.target])
+    argv.extend(args.options)
     cmd = subprocess.Popen(argv, cwd=KERNEL_SRC)
     rc = cmd.wait()
-    assert rc == 0, "make failed"
-
-def umount(args):
-    sudo(["/usr/bin/umount", RPI_MOUNT_BOOT, RPI_MOUNT_ROOT])
+    true_or_die(rc == 0, "make failed")
 
 def parse(argv):
     p = argparse.ArgumentParser(description="Raspberry Pi dev workflow utility")
-    p.add_argument("--target", help="kernel Makefile target")
 
     handlers = {
         "mount" : mount,
         "umount" : umount,
         "mkimage" : mkimage,
         "cpimage" : cpimage,
-        "make_kernel" : make_kernel,
+        "make" : make,
     }
 
     p.add_argument("command", choices=dict.keys(handlers))
+    p.add_argument("options", nargs='*')
 
     # bash and zsh completion
     if has_argcomplete:

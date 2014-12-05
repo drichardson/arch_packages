@@ -1,14 +1,35 @@
 .\" Manpage for rpi
 .\" Contact dougie.richardson@gmail.com to correct errors or typos.
-.TH man 8 "04 Dec 2014" "0.1" "rpi man page"
+.TH man 1 "04 Dec 2014" "0.0.6" "rpi man page"
 .SH NAME
 rpi \- toolkit for Raspberry Pi development
 .SH SYNOPSIS
-rpi mount
-rpi umount
+.B rpi
+<mount|umount|mkimage|cpimage>
+.br
+.B rpi
+make [target...]
 .SH DESCRIPTION
 rpi is a collection of commands to make working with the Raspberry Pi more efficient. It's focused on kernel development.
+.SH OPTIONS
+.TP
+.B rpi mount
+Mount the the 2 SD card partitions to ~/rpi_mnt/boot and ~/rpi_mnt/root. Assumes the first partition is the boot partition and second is the root.
+.TP
+.B rpi umount
+Unmount the 2 SD card partitions.
+.B rpi mkimage
+Make a kernel.img suitable for the Raspberry Pi.
+.TP
+.B rpi cpimage
+Copy kernel.img created with \fBrpi mkimage\fR to ~/rpi_mnt/boot/kernel-new.img.
+.TP
+.B rpi make
+Run \fBmake\fR in the Linux kernel source directory.
+.TP
+.B rpi make menuconfig
+Run \fBmake menuconfig\fR in the Linux kernel source directory.
 .SH BUGS
-Paths are hardcoded to Doug's VMWare fusion instance running ArchLinux.
+Paths are hardcoded to Doug's VMWare fusion instance running Arch Linux.
 .SH AUTHOR
 Doug Richardson (dougie.richardson@gmail.com)
