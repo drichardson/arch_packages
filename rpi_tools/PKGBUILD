@@ -1,0 +1,20 @@
+# Maintainer: Doug Richardson <dougie.richardson@gmail.com>
+pkgname=rpi_tools
+pkgver=0.0.1
+pkgrel=1
+pkgdesc="Raspberry Pi tools to make my workflow more efficient"
+arch=(any)
+url="https://github.com/drichardson/arch_packages"
+license=('BSD')
+depends=(python)
+optdepends=()
+backup=()
+changelog=
+install=
+source=('rpi')
+md5sums=('0e0d16fea54247adac136206c49a7661')
+
+package() {
+  install -Dm755 "$srcdir"/rpi "$pkgdir"/usr/bin/rpi
+}
+

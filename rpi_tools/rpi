@@ -1,0 +1,38 @@
+#!/usr/bin/python3
+
+import sys
+import argparse
+import subprocess
+import os.path
+
+RPI_MOUNT_DIR=os.path.expanduser("~/rpi_mnt")
+RPI_MOUNT_ROOT=os.path.join(RPI_MOUNT_DIR, "root")
+RPI_MOUNT_BOOT=os.path.join(RPI_MOUNT_DIR, "boot")
+SD_CARD_BOOT_PARTITION="/dev/sdc1"
+SD_CARD_ROOT_PARTITION="/dev/sdc2"
+
+def parse(argv):
+    p = argparse.ArgumentParser(description="Raspberry Pi dev workflow utility")
+    p.add_argument("command", choices=["mount","umount"])
+    return p.parse_args(argv)
+
+def sudo(args):
+    argv=["/usr/bin/sudo"]
+    argv.extend(args)
+    return subprocess.call(argv)
+
+def mount():
+    sudo(["/usr/bin/mount", SD_CARD_BOOT_PARTITION, RPI_MOUNT_BOOT])
+    sudo(["/usr/bin/mount", SD_CARD_ROOT_PARTITION, RPI_MOUNT_ROOT])
+
+def umount():
+    sudo(["/usr/bin/umount", RPI_MOUNT_BOOT, RPI_MOUNT_ROOT])
+
+def main():
+    args = parse(sys.argv[1:])
+    handlers = {
+            "mount" : mount,
+            "umount" : umount }
+    handlers[args.command]()
+
+main()
