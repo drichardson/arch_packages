@@ -1,9 +1,18 @@
 #!/usr/bin/python3
+# PYTHON_ARGCOMPLETE_OK
 
 import sys
 import argparse
 import subprocess
 import os.path
+
+# Conditional support for bash completion
+try:
+    import argcomplete
+    has_argcomplete=True
+except ImportError:
+    has_argcomplete=False
+
 
 RPI_MOUNT_DIR=os.path.expanduser("~/rpi_mnt")
 RPI_MOUNT_ROOT=os.path.join(RPI_MOUNT_DIR, "root")
@@ -64,6 +73,11 @@ def parse(argv):
     }
 
     p.add_argument("command", choices=dict.keys(handlers))
+
+    # bash and zsh completion
+    if has_argcomplete:
+        argcomplete.autocomplete(p)
+
     result = p.parse_args(argv)
     result.handler = handlers[result.command]
     return result
