@@ -12,7 +12,7 @@ backup=()
 changelog=
 install=
 source=(rpi rpi.1)
-md5sums=('98e69b003d02fd0ab7452befcd896333'
+md5sums=('8c77244f7fda103ffd89178cf4dffc2b'
          '6af5f2df9c4df7be86766b0ede18fd36')
 
 build() {

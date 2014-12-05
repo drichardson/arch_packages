@@ -96,6 +96,6 @@ def main():
     print("Using CCPREFIX: ", CCPREFIX)
     print("Using KERNEL_SRC: ", KERNEL_SRC)
     args.handler(args)
-    print("OK")
+    print("OK", args.command)
 
 main()
