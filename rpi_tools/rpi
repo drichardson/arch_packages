@@ -10,29 +10,59 @@ RPI_MOUNT_ROOT=os.path.join(RPI_MOUNT_DIR, "root")
 RPI_MOUNT_BOOT=os.path.join(RPI_MOUNT_DIR, "boot")
 SD_CARD_BOOT_PARTITION="/dev/sdc1"
 SD_CARD_ROOT_PARTITION="/dev/sdc2"
+KERNEL_SRC=os.path.expanduser("~/control_linux")
+RASPBERRYPI_TOOLS=os.path.expanduser("~/raspberrypi-tools")
+CCPREFIX=os.path.expanduser("~/x-tools6h/arm-unknown-linux-gnueabihf/bin/arm-unknown-linux-gnueabihf-")
 
-def parse(argv):
-    p = argparse.ArgumentParser(description="Raspberry Pi dev workflow utility")
-    p.add_argument("command", choices=["mount","umount"])
-    return p.parse_args(argv)
+def sudo(argv):
+    a=["/usr/bin/sudo"]
+    a.extend(argv)
+    return subprocess.call(a)
 
-def sudo(args):
-    argv=["/usr/bin/sudo"]
-    argv.extend(args)
-    return subprocess.call(argv)
-
-def mount():
+def mount(args):
     sudo(["/usr/bin/mount", SD_CARD_BOOT_PARTITION, RPI_MOUNT_BOOT])
     sudo(["/usr/bin/mount", SD_CARD_ROOT_PARTITION, RPI_MOUNT_ROOT])
 
-def umount():
+def mkimage(args):
+    mkimage_dir=os.path.join(RASPBERRYPI_TOOLS, "/mkimage")
+    zImage_path = os.path.join(KERNEL_SRC, "/arch/arm/boot/zImage")
+    argv=["./imagetool-uncompressed.py", zImage_path]
+    cmd = subprocess.Popen(args, cwd=mkimage_dir)
+    rc = cmd.wait()
+    assert rc == 0, "uncompress tool failed"
+
+def make_kernel(args):
+    cross_compile="CROSS_COMPILE=" + CCPREFIX
+    arch="ARCH=arm"
+    argv = ["/usr/bin/make", "-j8", cross_compile, arch]
+    if args.target:
+        argv.extend([args.target])
+    cmd = subprocess.Popen(argv, cwd=KERNEL_SRC)
+    cmd.wait()
+
+def umount(args):
     sudo(["/usr/bin/umount", RPI_MOUNT_BOOT, RPI_MOUNT_ROOT])
+
+def parse(argv):
+    p = argparse.ArgumentParser(description="Raspberry Pi dev workflow utility")
+    p.add_argument("--target", help="kernel Makefile target")
+
+    handlers = {
+        "mount" : mount,
+        "umount" : umount,
+        "mkimage" : mkimage,
+        "make_kernel" : make_kernel,
+    }
+
+    p.add_argument("command", choices=dict.keys(handlers))
+    result = p.parse_args(argv)
+    result.handler = handlers[result.command]
+    return result
 
 def main():
     args = parse(sys.argv[1:])
-    handlers = {
-            "mount" : mount,
-            "umount" : umount }
-    handlers[args.command]()
+    print("Using CCPREFIX: ", CCPREFIX)
+    print("Using KERNEL_SRC: ", KERNEL_SRC)
+    args.handler(args)
 
 main()
