@@ -5,7 +5,7 @@
 rpi \- toolkit for Raspberry Pi development
 .SH SYNOPSIS
 .B rpi
-<mount|umount|mkimage|cpimage|modules_install|all>
+<mount|umount|mkimage|cpimage|modules_install|all|kernel|all_clean>
 .br
 .B rpi
 make [target...]
@@ -36,6 +36,12 @@ Installs the kernel modules and firmware. Use this command instead of \fBrpi mak
 .TP
 .B rpi all
 Builds the kernel and kernel modules, mounts the SD card partitions, installs the kernel, modules, and firmware to the SD card, and finally unmounts the SD card partitions.
+.TP
+.B rpi kernel
+Like all, but only the kernel proper, not the modules or firmware.
+.TP
+.B rpi all_clean
+Like all, but also does a \fBmake clean\fR on the kernel before building.
 .SH BUGS
 Paths are hardcoded to Doug's VMWare fusion instance running Arch Linux.
 .SH AUTHOR

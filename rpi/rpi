@@ -107,6 +107,17 @@ def all():
     cpimage()
     umount()
 
+def all_clean():
+    make(["clean"])
+    all()
+
+def kernel():
+    make([])
+    mkimage()
+    mount()
+    cpimage()
+    umount()
+
 def parse(argv):
     p = argparse.ArgumentParser(description="Raspberry Pi dev workflow utility")
 
@@ -121,6 +132,8 @@ def parse(argv):
         "make" : lambda: make_if_not_modules_install(options),
         "modules_install" : modules_install,
         "all" : all,
+        "kernel" : kernel,
+        "all_clean" : all_clean,
     }
 
     p.add_argument("command", choices=dict.keys(handlers))
