@@ -78,9 +78,8 @@ def make(make_options):
     true_or_die(rc == 0, "make failed")
 
 def make_if_not_modules_install(make_options):
-    print("Options:", make_options)
-    true_or_die(False, "NONO")
     true_or_die("modules_install" not in make_options, "Use modules_install command instead")
+    true_or_die("firmware_install" not in make_options, "Use modules_install command instead")
     make(make_options)
 
 def modules_install():
