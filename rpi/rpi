@@ -33,18 +33,18 @@ def sudo(argv):
     a.extend(argv)
     return subprocess.call(a)
 
-def mount(args):
+def mount():
     print("Mounting SD card partitions")
     rc1 = sudo(["/usr/bin/mount", SD_CARD_BOOT_PARTITION, RPI_MOUNT_BOOT])
     rc2 = sudo(["/usr/bin/mount", SD_CARD_ROOT_PARTITION, RPI_MOUNT_ROOT])
     true_or_die(rc1 == 0 and rc2 == 0, "A mount command failed")
 
-def umount(args):
+def umount():
     print("Unmounting SD card partitions")
     rc = sudo(["/usr/bin/umount", RPI_MOUNT_BOOT, RPI_MOUNT_ROOT])
     true_or_die(rc == 0, "umount failed")
 
-def mkimage(args):
+def mkimage():
     mkimage_dir=os.path.join(RASPBERRYPI_TOOLS, "mkimage")
     zImage_path = os.path.join(KERNEL_SRC, "arch/arm/boot/zImage")
     argv=["./imagetool-uncompressed.py", zImage_path]
@@ -53,31 +53,75 @@ def mkimage(args):
     rc = cmd.wait()
     true_or_die(rc == 0, "imagetool-uncompressed.py failed")
 
-def cpimage(args):
+def cpimage():
     kernel_img=os.path.join(RASPBERRYPI_TOOLS, "mkimage/kernel.img")
     dest=os.path.join(RPI_MOUNT_BOOT, "kernel-new.img")
     print("Copying kernel image to ", dest)
     rc = sudo(["/usr/bin/cp", kernel_img, dest])
     true_or_die(rc == 0, "failed to copy kernel image")
 
-def make(args):
+def cpmodules():
+    argv = ["/usr/bin/tar"]
+    cmd = subprocess.Popen(argv, cwd=mkimage_dir)
+    pass
+
+def make_call_args(make_options):
     cross_compile="CROSS_COMPILE=" + CCPREFIX
     arch="ARCH=arm"
-    argv = ["/usr/bin/make", "-j8", cross_compile, arch]
-    argv.extend(args.options)
-    cmd = subprocess.Popen(argv, cwd=KERNEL_SRC)
+    argv = ["/usr/bin/make", "-C", KERNEL_SRC, "-j8", cross_compile, arch]
+    argv.extend(make_options)
+    return argv
+
+def make(make_options):
+    cmd = subprocess.Popen(make_call_args(make_options))
     rc = cmd.wait()
     true_or_die(rc == 0, "make failed")
 
+def make_if_not_modules_install(make_options):
+    print("Options:", make_options)
+    true_or_die(False, "NONO")
+    true_or_die("modules_install" not in make_options, "Use modules_install command instead")
+    make(make_options)
+
+def modules_install():
+    # Make sure the root directory is mounted.
+    true_or_die(os.path.ismount(RPI_MOUNT_ROOT), "Root partition not mounted. Try rpi mount")
+
+    # Create a clean modules_tmp, so that old modules aren't accidentally included.
+    #subprocess.call(["/usr/bin/rm", "-rf", INSTALL_MOD_PATH])
+    #rc = subprocess.call(["/usr/bin/mkdir", INSTALL_MOD_PATH])
+    #true_or_die(rc == 0, "mkdir failed to create " + INSTALL_MOD_PATH)
+
+    # Make sure the modules are built as the current user before running sudo make modules_install
+    make(["modules"])
+
+    # Run kernel makefile's modules_install and firmware_install targets.
+    mod_path = "INSTALL_MOD_PATH="+RPI_MOUNT_ROOT
+    rc = sudo(make_call_args([mod_path, "modules_install", "firmware_install"]))
+    true_or_die(rc == 0, "Error installing modules and firmware")
+
+def all():
+    make([])
+    mkimage()
+    mount()
+    modules_install()
+    cpimage()
+    umount()
+
 def parse(argv):
     p = argparse.ArgumentParser(description="Raspberry Pi dev workflow utility")
+
+    options=[]
 
     handlers = {
         "mount" : mount,
         "umount" : umount,
         "mkimage" : mkimage,
         "cpimage" : cpimage,
-        "make" : make,
+        "cpmodules" : cpmodules,
+        "make" : lambda: make_if_not_modules_install(options),
+        "modules_install" : modules_install,
+        "all" : all,
     }
 
     p.add_argument("command", choices=dict.keys(handlers))
@@ -89,13 +133,17 @@ def parse(argv):
 
     result = p.parse_args(argv)
     result.handler = handlers[result.command]
+
+    # update options for use of the lambda above
+    options=result.options
+
     return result
 
 def main():
     args = parse(sys.argv[1:])
     print("Using CCPREFIX: ", CCPREFIX)
     print("Using KERNEL_SRC: ", KERNEL_SRC)
-    args.handler(args)
+    args.handler()
     print("OK", args.command)
 
 main()

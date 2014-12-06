@@ -1,19 +1,19 @@
 # Maintainer: Doug Richardson <dougie.richardson@gmail.com>
 pkgname=rpi
-pkgver=0.0.6
+pkgver=0.0.7
 pkgrel=1
 pkgdesc="Raspberry Pi tool to make my workflow more efficient"
 arch=(any)
 url="https://github.com/drichardson/arch_packages"
 license=('BSD')
-depends=(python)
+depends=(python sudo)
 optdepends=(python-argcomplete)
 backup=()
 changelog=
 install=
 source=(rpi rpi.1)
-md5sums=('8c77244f7fda103ffd89178cf4dffc2b'
-         '1c7178ce5cefd2d4acdbfb6f82761f70')
+md5sums=('b52a294965cf835fa46137ee58897548'
+         'bd3292da2fd8e0eb3bdc9abc5f4a27eb')
 
 build() {
     cd "$srcdir"

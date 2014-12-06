@@ -5,12 +5,12 @@
 rpi \- toolkit for Raspberry Pi development
 .SH SYNOPSIS
 .B rpi
-<mount|umount|mkimage|cpimage>
+<mount|umount|mkimage|cpimage|modules_install|all>
 .br
 .B rpi
 make [target...]
 .SH DESCRIPTION
-rpi is a collection of commands to make working with the Raspberry Pi more efficient. It's focused on kernel development.
+rpi is a collection of commands to make working with the Raspberry Pi more efficient. It's focused on kernel development. The current user is expected to have sudo access.
 .SH OPTIONS
 .TP
 .B rpi mount
@@ -30,8 +30,12 @@ Run \fBmake\fR in the Linux kernel source directory.
 .B rpi make menuconfig
 Run \fBmake menuconfig\fR in the Linux kernel source directory.
 .TP
-.B rpi make && rpi mkimage && rpi mount && rpi cpimage && rpi umount
-A full build and install to SD card cycle. Does a kernel build, convert zImage to kernel.img, mount the SD card partitions, copy the image to the SD card partitions, and then unmount the SD card partitions.
+.TP
+.B rpi modules_install
+Installs the kernel modules and firmware. Use this command instead of \fBrpi make modules_install firmware_install\fR because this command make sure to compile as the current user and only switches to root (using sudo) when needed to install the modules on the SD card.
+.TP
+.B rpi all
+Builds the kernel and kernel modules, mounts the SD card partitions, installs the kernel, modules, and firmware to the SD card, and finally unmounts the SD card partitions.
 .SH BUGS
 Paths are hardcoded to Doug's VMWare fusion instance running Arch Linux.
 .SH AUTHOR
