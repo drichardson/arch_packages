@@ -21,7 +21,7 @@ SD_CARD_BOOT_PARTITION="/dev/sdc1"
 SD_CARD_ROOT_PARTITION="/dev/sdc2"
 KERNEL_SRC=os.path.expanduser("~/control_linux")
 RASPBERRYPI_TOOLS=os.path.expanduser("~/raspberrypi-tools")
-CCPREFIX=os.path.expanduser("~/x-tools6h/arm-unknown-linux-gnueabihf/bin/arm-unknown-linux-gnueabihf-")
+CROSS_COMPILE=os.path.expanduser("~/x-tools6h/arm-unknown-linux-gnueabihf/bin/arm-unknown-linux-gnueabihf-")
 
 def true_or_die(condition, message):
     if not condition:
@@ -66,7 +66,7 @@ def cpmodules():
     pass
 
 def make_call_args(make_options):
-    cross_compile="CROSS_COMPILE=" + CCPREFIX
+    cross_compile="CROSS_COMPILE=" + CROSS_COMPILE
     arch="ARCH=arm"
     argv = ["/usr/bin/make", "-C", KERNEL_SRC, "-j8", cross_compile, arch]
     argv.extend(make_options)
@@ -153,7 +153,7 @@ def parse(argv):
 
 def main():
     args = parse(sys.argv[1:])
-    print("Using CCPREFIX: ", CCPREFIX)
+    print("Using CROSS_COMPILE: ", CROSS_COMPILE)
     print("Using KERNEL_SRC: ", KERNEL_SRC)
     args.handler()
     print("OK", args.command)
