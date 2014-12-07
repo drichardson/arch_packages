@@ -1,17 +1,17 @@
 .\" Manpage for rpi
 .\" Contact dougie.richardson@gmail.com to correct errors or typos.
-.TH man 1 "04 Dec 2014" "0.0.6" "rpi man page"
+.TH man 1 "07 Dec 2014" "0.0.11" "rpi man page"
 .SH NAME
 rpi \- toolkit for Raspberry Pi development
 .SH SYNOPSIS
 .B rpi
-<mount|umount|mkimage|cpimage|modules_install|all|kernel|all_clean|cat>
+<command>
 .br
 .B rpi
 make [target...]
 .SH DESCRIPTION
 rpi is a collection of commands to make working with the Raspberry Pi more efficient. It's focused on kernel development. The current user is expected to have sudo access.
-.SH OPTIONS
+.SH COMMANDS
 .TP
 .B rpi mount
 Mount the the 2 SD card partitions to ~/rpi_mnt/boot and ~/rpi_mnt/root. Assumes the first partition is the boot partition and second is the root.
@@ -45,6 +45,12 @@ Like all, but also does a \fBmake clean\fR on the kernel before building.
 .TP
 .B rpi cat
 Read and print text from the usb to serial adapter connected to the Raspberry Pi. Handles resetting the tty settings of the device in case you've used gdb remote debuggin on it (which screws with the tty settings).
+.TP
+.B rpi cc_args
+Run clang_complete's cc_args program on KERNEL_SRC to generate a clangs complete configuration.
+.TP
+.B rpi config
+Dump the \fBrpi\fR configuration.
 .SH BUGS
 Paths are hardcoded to Doug's VMWare fusion instance running Arch Linux.
 .SH AUTHOR

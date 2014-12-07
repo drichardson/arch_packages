@@ -1,6 +1,6 @@
 # Maintainer: Doug Richardson <dougie.richardson@gmail.com>
 pkgname=rpi
-pkgver=0.0.10
+pkgver=0.0.11
 pkgrel=1
 pkgdesc="Raspberry Pi tool to make my workflow more efficient"
 arch=(any)
@@ -12,8 +12,8 @@ backup=()
 changelog=
 install=
 source=(rpi rpi.1)
-md5sums=('202526868c3be2b2e32af98e1f4283ef'
-         'e0633b59c08614980f237e9ad98b79be')
+md5sums=('7a3810a4871f2ad2e348bcbc4c6d7d9b'
+         'bb2e2923c7b22547225687eeacf3e517')
 
 build() {
     cd "$srcdir"

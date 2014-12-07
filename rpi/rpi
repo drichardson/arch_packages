@@ -13,16 +13,20 @@ try:
 except ImportError:
     has_argcomplete=False
 
+class Config:
+    pass
 
-RPI_MOUNT_DIR=os.path.expanduser("~/rpi_mnt")
-RPI_MOUNT_ROOT=os.path.join(RPI_MOUNT_DIR, "root")
-RPI_MOUNT_BOOT=os.path.join(RPI_MOUNT_DIR, "boot")
-SD_CARD_BOOT_PARTITION="/dev/sdc1"
-SD_CARD_ROOT_PARTITION="/dev/sdc2"
-KERNEL_SRC=os.path.expanduser("~/control_linux")
-RASPBERRYPI_TOOLS=os.path.expanduser("~/raspberrypi-tools")
-CROSS_COMPILE=os.path.expanduser("~/x-tools6h/arm-unknown-linux-gnueabihf/bin/arm-unknown-linux-gnueabihf-")
-USB_SERIAL_TTY="/dev/ttyUSB0"
+C = Config
+C.RPI_MOUNT_DIR=os.path.expanduser("~/rpi_mnt")
+C.RPI_MOUNT_ROOT=os.path.join(C.RPI_MOUNT_DIR, "root")
+C.RPI_MOUNT_BOOT=os.path.join(C.RPI_MOUNT_DIR, "boot")
+C.SD_CARD_BOOT_PARTITION="/dev/sdc1"
+C.SD_CARD_ROOT_PARTITION="/dev/sdc2"
+C.KERNEL_SRC=os.path.expanduser("~/control_linux")
+C.RASPBERRYPI_TOOLS=os.path.expanduser("~/raspberrypi-tools")
+C.CROSS_COMPILE=os.path.expanduser("~/x-tools6h/arm-unknown-linux-gnueabihf/bin/arm-unknown-linux-gnueabihf-")
+C.USB_SERIAL_TTY="/dev/ttyUSB0"
+C.CLANG_COMPLETE_CCARGS=os.path.expanduser("~/.vim/bundle/clang_complete/bin/cc_args.py")
 
 def true_or_die(condition, message):
     if not condition:
@@ -36,25 +40,25 @@ def sudo(argv):
 
 def mount():
     print("Mounting SD card partitions")
-    if not os.path.ismount(RPI_MOUNT_BOOT):
-        rc = sudo(["/usr/bin/mount", SD_CARD_BOOT_PARTITION, RPI_MOUNT_BOOT])
+    if not os.path.ismount(C.RPI_MOUNT_BOOT):
+        rc = sudo(["/usr/bin/mount", C.SD_CARD_BOOT_PARTITION, C.RPI_MOUNT_BOOT])
         true_or_die(rc == 0, "Failed to mount boot partition")
-    if not os.path.ismount(RPI_MOUNT_ROOT):
-        rc2 = sudo(["/usr/bin/mount", SD_CARD_ROOT_PARTITION, RPI_MOUNT_ROOT])
+    if not os.path.ismount(C.RPI_MOUNT_ROOT):
+        rc2 = sudo(["/usr/bin/mount", C.SD_CARD_ROOT_PARTITION, C.RPI_MOUNT_ROOT])
         true_or_die(rc == 0, "Failed to mount root partition")
 
 def umount():
     print("Unmounting SD card partitions")
-    if os.path.ismount(RPI_MOUNT_BOOT):
-        rc = sudo(["/usr/bin/umount", RPI_MOUNT_BOOT])
+    if os.path.ismount(C.RPI_MOUNT_BOOT):
+        rc = sudo(["/usr/bin/umount", C.RPI_MOUNT_BOOT])
         true_or_die(rc == 0, "umount failed on boot partition")
-    if os.path.ismount(RPI_MOUNT_ROOT):
-        rc = sudo(["/usr/bin/umount", RPI_MOUNT_ROOT])
+    if os.path.ismount(C.RPI_MOUNT_ROOT):
+        rc = sudo(["/usr/bin/umount", C.RPI_MOUNT_ROOT])
         true_or_die(rc == 0, "umount failed on root partition")
 
 def mkimage():
-    mkimage_dir=os.path.join(RASPBERRYPI_TOOLS, "mkimage")
-    zImage_path = os.path.join(KERNEL_SRC, "arch/arm/boot/zImage")
+    mkimage_dir=os.path.join(C.RASPBERRYPI_TOOLS, "mkimage")
+    zImage_path = os.path.join(C.KERNEL_SRC, "arch/arm/boot/zImage")
     argv=["./imagetool-uncompressed.py", zImage_path]
     print("Uncompressing kernel image to ", mkimage_dir)
     cmd = subprocess.Popen(argv, cwd=mkimage_dir)
@@ -62,8 +66,8 @@ def mkimage():
     true_or_die(rc == 0, "imagetool-uncompressed.py failed")
 
 def cpimage():
-    kernel_img=os.path.join(RASPBERRYPI_TOOLS, "mkimage/kernel.img")
-    dest=os.path.join(RPI_MOUNT_BOOT, "kernel-new.img")
+    kernel_img=os.path.join(C.RASPBERRYPI_TOOLS, "mkimage/kernel.img")
+    dest=os.path.join(C.RPI_MOUNT_BOOT, "kernel-new.img")
     print("Copying kernel image to ", dest)
     rc = sudo(["/usr/bin/cp", kernel_img, dest])
     true_or_die(rc == 0, "failed to copy kernel image")
@@ -74,9 +78,9 @@ def cpmodules():
     pass
 
 def make_call_args(make_options):
-    cross_compile="CROSS_COMPILE=" + CROSS_COMPILE
+    cross_compile="CROSS_COMPILE=" + C.CROSS_COMPILE
     arch="ARCH=arm"
-    argv = ["/usr/bin/make", "-C", KERNEL_SRC, "-j8", cross_compile, arch]
+    argv = ["/usr/bin/make", "-C", C.KERNEL_SRC, "-j8", cross_compile, arch]
     argv.extend(make_options)
     return argv
 
@@ -92,18 +96,18 @@ def make_if_not_modules_install(make_options):
 
 def modules_install():
     # Make sure the root directory is mounted.
-    true_or_die(os.path.ismount(RPI_MOUNT_ROOT), "Root partition not mounted. Try rpi mount")
+    true_or_die(os.path.ismount(C.RPI_MOUNT_ROOT), "Root partition not mounted. Try rpi mount")
 
     # Create a clean modules_tmp, so that old modules aren't accidentally included.
-    #subprocess.call(["/usr/bin/rm", "-rf", INSTALL_MOD_PATH])
-    #rc = subprocess.call(["/usr/bin/mkdir", INSTALL_MOD_PATH])
-    #true_or_die(rc == 0, "mkdir failed to create " + INSTALL_MOD_PATH)
+    #subprocess.call(["/usr/bin/rm", "-rf", C.INSTALL_MOD_PATH])
+    #rc = subprocess.call(["/usr/bin/mkdir", C.INSTALL_MOD_PATH])
+    #true_or_die(rc == 0, "mkdir failed to create " + C.INSTALL_MOD_PATH)
 
     # Make sure the modules are built as the current user before running sudo make modules_install
     make(["modules"])
 
     # Run kernel makefile's modules_install and firmware_install targets.
-    mod_path = "INSTALL_MOD_PATH="+RPI_MOUNT_ROOT
+    mod_path = "INSTALL_MOD_PATH="+C.RPI_MOUNT_ROOT
     rc = sudo(make_call_args([mod_path, "modules_install", "firmware_install"]))
     true_or_die(rc == 0, "Error installing modules and firmware")
 
@@ -127,13 +131,24 @@ def kernel():
     umount()
 
 def cat():
-    rc = subprocess.call(['/usr/bin/stty', '-F', USB_SERIAL_TTY, "raw"])
+    rc = subprocess.call(['/usr/bin/stty', '-F', C.USB_SERIAL_TTY, "raw"])
     true_or_die(rc == 0, "Problem fixing up usb-serial device tty settings.")
     try:
-        rc = subprocess.call(['/usr/bin/cat', USB_SERIAL_TTY])
-        true_or_die(rc == 0, "Problem catting usb-serial tty " + USB_SERIAL_TTY)
+        rc = subprocess.call(['/usr/bin/cat', C.USB_SERIAL_TTY])
+        true_or_die(rc == 0, "Problem catting usb-serial tty " + C.USB_SERIAL_TTY)
     except KeyboardInterrupt:
         sys.exit(0)
+
+def cc_args():
+    save=C.CROSS_COMPILE
+    C.CROSS_COMPILE=C.CLANG_COMPLETE_CCARGS + " " + C.CROSS_COMPILE
+    make([])
+    C.CROSS_COMPILE=save
+
+def config():
+    unsorted_kv_pairs = [kv for kv in vars(C).items() if kv[0][0].isupper()]
+    for key,value in sorted(unsorted_kv_pairs):
+        print(key,":",value)
 
 def parse(argv):
     p = argparse.ArgumentParser(description="Raspberry Pi dev workflow utility")
@@ -152,6 +167,8 @@ def parse(argv):
         "kernel" : kernel,
         "all_clean" : all_clean,
         "cat": cat,
+        "cc_args": cc_args,
+        "config": config,
     }
 
     p.add_argument("command", choices=dict.keys(handlers))
@@ -172,8 +189,6 @@ def parse(argv):
 
 def main():
     args = parse(sys.argv[1:])
-    print("Using CROSS_COMPILE: ", CROSS_COMPILE)
-    print("Using KERNEL_SRC: ", KERNEL_SRC)
     args.handler()
     print("OK", args.command)
 
