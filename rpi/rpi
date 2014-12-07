@@ -35,14 +35,21 @@ def sudo(argv):
 
 def mount():
     print("Mounting SD card partitions")
-    rc1 = sudo(["/usr/bin/mount", SD_CARD_BOOT_PARTITION, RPI_MOUNT_BOOT])
-    rc2 = sudo(["/usr/bin/mount", SD_CARD_ROOT_PARTITION, RPI_MOUNT_ROOT])
-    true_or_die(rc1 == 0 and rc2 == 0, "A mount command failed")
+    if not os.path.ismount(RPI_MOUNT_BOOT):
+        rc = sudo(["/usr/bin/mount", SD_CARD_BOOT_PARTITION, RPI_MOUNT_BOOT])
+        true_or_die(rc == 0, "Failed to mount boot partition")
+    if not os.path.ismount(RPI_MOUNT_ROOT):
+        rc2 = sudo(["/usr/bin/mount", SD_CARD_ROOT_PARTITION, RPI_MOUNT_ROOT])
+        true_or_die(rc == 0, "Failed to mount root partition")
 
 def umount():
     print("Unmounting SD card partitions")
-    rc = sudo(["/usr/bin/umount", RPI_MOUNT_BOOT, RPI_MOUNT_ROOT])
-    true_or_die(rc == 0, "umount failed")
+    if os.path.ismount(RPI_MOUNT_BOOT):
+        rc = sudo(["/usr/bin/umount", RPI_MOUNT_BOOT])
+        true_or_die(rc == 0, "umount failed on boot partition")
+    if os.path.ismount(RPI_MOUNT_ROOT):
+        rc = sudo(["/usr/bin/umount", RPI_MOUNT_ROOT])
+        true_or_die(rc == 0, "umount failed on root partition")
 
 def mkimage():
     mkimage_dir=os.path.join(RASPBERRYPI_TOOLS, "mkimage")
