@@ -22,6 +22,7 @@ SD_CARD_ROOT_PARTITION="/dev/sdc2"
 KERNEL_SRC=os.path.expanduser("~/control_linux")
 RASPBERRYPI_TOOLS=os.path.expanduser("~/raspberrypi-tools")
 CROSS_COMPILE=os.path.expanduser("~/x-tools6h/arm-unknown-linux-gnueabihf/bin/arm-unknown-linux-gnueabihf-")
+USB_SERIAL_TTY="/dev/ttyUSB0"
 
 def true_or_die(condition, message):
     if not condition:
@@ -125,6 +126,15 @@ def kernel():
     cpimage()
     umount()
 
+def cat():
+    rc = subprocess.call(['/usr/bin/stty', '-F', USB_SERIAL_TTY, "raw"])
+    true_or_die(rc == 0, "Problem fixing up usb-serial device tty settings.")
+    try:
+        rc = subprocess.call(['/usr/bin/cat', USB_SERIAL_TTY])
+        true_or_die(rc == 0, "Problem catting usb-serial tty " + USB_SERIAL_TTY)
+    except KeyboardInterrupt:
+        sys.exit(0)
+
 def parse(argv):
     p = argparse.ArgumentParser(description="Raspberry Pi dev workflow utility")
 
@@ -141,6 +151,7 @@ def parse(argv):
         "all" : all,
         "kernel" : kernel,
         "all_clean" : all_clean,
+        "cat": cat,
     }
 
     p.add_argument("command", choices=dict.keys(handlers))
@@ -157,6 +168,7 @@ def parse(argv):
     options=result.options
 
     return result
+
 
 def main():
     args = parse(sys.argv[1:])

@@ -5,7 +5,7 @@
 rpi \- toolkit for Raspberry Pi development
 .SH SYNOPSIS
 .B rpi
-<mount|umount|mkimage|cpimage|modules_install|all|kernel|all_clean>
+<mount|umount|mkimage|cpimage|modules_install|all|kernel|all_clean|cat>
 .br
 .B rpi
 make [target...]
@@ -42,6 +42,9 @@ Like all, but only the kernel proper, not the modules or firmware.
 .TP
 .B rpi all_clean
 Like all, but also does a \fBmake clean\fR on the kernel before building.
+.TP
+.B rpi cat
+Read and print text from the usb to serial adapter connected to the Raspberry Pi. Handles resetting the tty settings of the device in case you've used gdb remote debuggin on it (which screws with the tty settings).
 .SH BUGS
 Paths are hardcoded to Doug's VMWare fusion instance running Arch Linux.
 .SH AUTHOR
