@@ -1,6 +1,6 @@
 .\" Manpage for rpi
 .\" Contact dougie.richardson@gmail.com to correct errors or typos.
-.TH man 1 "07 Dec 2014" "0.0.11" "rpi man page"
+.TH man 1 "07 Dec 2014" "0.0.12" "rpi man page"
 .SH NAME
 rpi \- toolkit for Raspberry Pi development
 .SH SYNOPSIS
@@ -48,6 +48,9 @@ Read and print text from the usb to serial adapter connected to the Raspberry Pi
 .TP
 .B rpi cc_args
 Run clang_complete's cc_args program on KERNEL_SRC to generate a clangs complete configuration.
+.TP
+.B rpi ctags
+Run ctags on KERNEL_SRC, excluding non-ARM directories in the arch sub-directory.
 .TP
 .B rpi config
 Dump the \fBrpi\fR configuration.

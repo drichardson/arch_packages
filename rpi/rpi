@@ -150,6 +150,21 @@ def config():
     for key,value in sorted(unsorted_kv_pairs):
         print(key,":",value)
 
+def ctags(options):
+    save_cwd = os.getcwd()
+    os.chdir(C.KERNEL_SRC)
+
+    # exclude non-ARM architecture directories
+    excludes = ["arch/"+d for d in os.listdir("arch") if d != "arm"]
+    # exclude options prefixed with no. E.g., nodrivers
+    excludes += [d[2:] for d in options if d[0:2] == "no"]
+
+    argv = ["/usr/bin/ctags", "-R", "."] + ["--exclude="+d for d in excludes]
+    print("Running ", " ".join(argv))
+    rc = subprocess.call(argv)
+    true_or_die(rc == 0, "ctags failed")
+    os.chdir(save_cwd)
+
 def parse(argv):
     p = argparse.ArgumentParser(description="Raspberry Pi dev workflow utility")
 
@@ -169,6 +184,7 @@ def parse(argv):
         "cat": cat,
         "cc_args": cc_args,
         "config": config,
+        "ctags": lambda: ctags(options),
     }
 
     p.add_argument("command", choices=dict.keys(handlers))
