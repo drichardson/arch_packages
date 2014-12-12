@@ -16,13 +16,14 @@ except ImportError:
 class Config:
     pass
 
-C = Config
+# C is the configuration and the initial values are below.
+C = Config()
 C.RPI_MOUNT_DIR=os.path.expanduser("~/rpi_mnt")
 C.RPI_MOUNT_ROOT=os.path.join(C.RPI_MOUNT_DIR, "root")
 C.RPI_MOUNT_BOOT=os.path.join(C.RPI_MOUNT_DIR, "boot")
 C.SD_CARD_BOOT_PARTITION="/dev/sdc1"
 C.SD_CARD_ROOT_PARTITION="/dev/sdc2"
-C.KERNEL_SRC=os.path.expanduser("~/control_linux")
+C.KERNEL_SRC=os.path.expanduser("~/linux")
 C.RASPBERRYPI_TOOLS=os.path.expanduser("~/raspberrypi-tools")
 C.CROSS_COMPILE=os.path.expanduser("~/x-tools6h/arm-unknown-linux-gnueabihf/bin/arm-unknown-linux-gnueabihf-")
 C.USB_SERIAL_TTY="/dev/ttyUSB0"
@@ -145,9 +146,11 @@ def cc_args():
     make([])
     C.CROSS_COMPILE=save
 
+def config_key_value_pairs():
+    return [kv for kv in vars(C).items() if kv[0][0].isupper()]
+
 def config():
-    unsorted_kv_pairs = [kv for kv in vars(C).items() if kv[0][0].isupper()]
-    for key,value in sorted(unsorted_kv_pairs):
+    for key,value in sorted(config_key_value_pairs()):
         print(key,":",value)
 
 def ctags(options):
@@ -202,9 +205,38 @@ def parse(argv):
 
     return result
 
+def prompt_for_initial_config(path):
+    for key,value in sorted(config_key_value_pairs()):
+        print(key,"["+value+"] ", end="", flush=True)
+        line=sys.stdin.readline().rstrip()
+        if len(line) > 0:
+            C.__dict__[key] = line
+
+def write_config(path):
+    with open(path, "w") as out:
+        for key,value in config_key_value_pairs():
+            print(key,"=",value,file=out,sep="")
+
+def read_config(path):
+    with open(path, "r") as f:
+        for line in f:
+            key,value=line.split('=')
+            key=key.strip()
+            value=value.strip()
+            C.__dict__[key]=value
 
 def main():
     args = parse(sys.argv[1:])
+
+    # Read config
+    config_path=os.path.expanduser("~/.rpi_config")
+    if not os.path.exists(config_path):
+        print("No config file found at " + config_path + ". Will prompt for configuration values.")
+        prompt_for_initial_config(config_path)
+        print("Saving configuration to " + config_path)
+        write_config(config_path)
+    read_config(config_path)
+
     args.handler()
     print("OK", args.command)
 
