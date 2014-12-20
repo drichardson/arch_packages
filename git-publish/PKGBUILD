@@ -1,0 +1,21 @@
+# Maintainer: Doug Richardson <dougie.richardson@gmail.com>
+pkgname=git-publish
+pkgver=0.0.1
+pkgrel=1
+pkgdesc="Publish a git repository as a tarball"
+arch=(any)
+url="https://github.com/drichardson/arch_packages"
+license=('BSD')
+depends=(rsync)
+optdepends=()
+backup=()
+changelog=
+install=
+source=(git-publish)
+md5sums=('530fb76651c74a2eca9611d82d80c640')
+
+package() {
+    cd "$srcdir"
+    install -Dm755 git-publish "$pkgdir"/usr/bin/git-publish
+}
+
