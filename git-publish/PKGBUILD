@@ -12,7 +12,7 @@ backup=()
 changelog=
 install=
 source=(git-publish)
-sha256sums=('f390d5d02b135805e2cb8c1a1a783c204aab47fb1730b07c5a511a10e70fdfd1')
+sha256sums=('d0fa8eefe47874bee0ff5ccd54bf42c6e450a192bfd403696b171c23b642f514')
 
 package() {
     cd "$srcdir"
