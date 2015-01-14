@@ -1,6 +1,6 @@
 # Maintainer: Doug Richardson <dougie.richardson@gmail.com>
 pkgname=git-publish
-pkgver=0.0.1
+pkgver=1.0.0
 pkgrel=1
 pkgdesc="Publish a git repository as a tarball"
 arch=(any)
@@ -12,10 +12,9 @@ backup=()
 changelog=
 install=
 source=(git-publish)
-md5sums=('530fb76651c74a2eca9611d82d80c640')
+sha256sums=('f390d5d02b135805e2cb8c1a1a783c204aab47fb1730b07c5a511a10e70fdfd1')
 
 package() {
     cd "$srcdir"
     install -Dm755 git-publish "$pkgdir"/usr/bin/git-publish
 }
-
