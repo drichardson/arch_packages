@@ -33,13 +33,10 @@ if [ -e "$TMPFILE" ]; then
 fi
 
 echo "Creating tarball at $TMPFILE"
-tar -C "$(dirname $REPO_BASE)" -c -z -v -f "$TMPFILE" "$(basename $REPO_BASE)"
+tar -C "$(dirname $REPO_BASE)" -c -z -v --exclude-vcs --exclude-vcs-ignores -f "$TMPFILE" "$(basename $REPO_BASE)"
 
 echo "Rsyncing tarball to $RSYNC_DEST"
 rsync -v "$TMPFILE" "$RSYNC_DEST"
 
 echo OK
-
-
-
 

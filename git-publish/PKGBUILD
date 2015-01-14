@@ -1,12 +1,12 @@
 # Maintainer: Doug Richardson <dougie.richardson@gmail.com>
 pkgname=git-publish
-pkgver=1.0.0
+pkgver=1.0.1
 pkgrel=1
 pkgdesc="Publish a git repository as a tarball"
 arch=(any)
 url="https://github.com/drichardson/arch_packages"
 license=('BSD')
-depends=(rsync)
+depends=(rsync git)
 optdepends=()
 backup=()
 changelog=
