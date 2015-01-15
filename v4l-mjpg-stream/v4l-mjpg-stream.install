@@ -1,5 +1,3 @@
-systemctl=/usr/bin/systemctl
-MYSERVICE=v4l-mjpg-stream.service
 MYUSER=v4l-mjpg-stream
 
 ## arg 1:  the new package version
@@ -9,10 +7,8 @@ pre_install() {
 
 ## arg 1:  the new package version
 post_install() {
-    $systemctl daemon-reload
-    $systemctl enable $MYSERVICE
-    $systemctl start $MYSERVICE
-    echo "The service should now be accessible on port 8080"
+    echo "To start the service, run: systemctl start v4l-mjpg-service"
+    echo "To enable the service at boot, run: systemctl enable v4l-mjpg-service"
 }
 
 ## arg 1:  the new package version
@@ -24,18 +20,17 @@ pre_upgrade() {
 ## arg 1:  the new package version
 ## arg 2:  the old package version
 post_upgrade() {
-    $systemctl daemon-reload
-    $systemctl reload-or-try-restart $MYSERVICE
+    :
 }
 
 ## arg 1:  the old package version
 pre_remove() {
-    $systemctl stop $MYSERVICE
-    $systemctl disable $MYSERVICE
+    :
 }
 
 ## arg 1:  the old package version
 post_remove() {
-    $systemctl daemon-reload
+    echo "You may want to stop the service using: systemctl stop v4l-mjpg-service"
+    echo "You may want to disable the service using: systemctl disable v4l-mjpg-service"
     echo "You may want to remove $MYUSER user"
 }
